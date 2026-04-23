@@ -1,6 +1,52 @@
+const products = require('../models/products')
 const Products = require('../models/products')
 
-const insertProductSchema = async(req, res)=>{
+
+const getProductsStat = async(req, res)=>{
+
+  try{
+      const data =  await Products.aggregate([
+          {
+            $match:{
+              inStock: true,
+              price: {
+                  $gte: 100
+              }
+
+            },
+
+            
+          }
+      ])
+      
+      
+      if(data.length === 0){
+          return res.status(404).json({
+             success: false,
+             message: 'no product match the price!',
+             product: []
+          })
+      }
+
+
+      return res.status(200).json({
+          success: true,
+          message: 'prodouct fetched successfully!',
+          product: data
+      })
+
+  }catch(error){
+    console.log(error)
+        res.status(500).json({
+            success: false,
+            message: `something went wrong! server error: ${error.message}`
+        })
+
+  }
+
+}
+
+const insertProduct = async(req, res)=>{
     try{  const sampleProducts = [
       {
         name: "Laptop",
@@ -16,6 +62,16 @@ const insertProductSchema = async(req, res)=>{
         inStock: true,
         tags: ["mobile", "tech"],
       },
+
+      {
+        name: "wrist watch",
+        category: "Electronics",
+        price: 100,
+        inStock: true,
+        tags: ["mobile", "tech"],
+      },
+
+
       {
         name: "Headphones",
         category: "Electronics",
@@ -40,19 +96,27 @@ const insertProductSchema = async(req, res)=>{
     ];
 
 
-    const result = await Products.insertMany(sampleProducts)
-    if(result){
-        res.status(201).json({
+   
+    if (!sampleProducts || sampleProducts.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No products to insert"
+      });
+    }
+
+     const result = await Products.insertMany(sampleProducts)
+    
+      return res.status(201).json({
             success: true,
             message: `products has been inserted ${result.length}`
         })
-    }
+    
 
         
 
     }catch(error){
         console.log(error)
-        res.status(400).json({
+        res.status(500).json({
             success: false,
             message: `something went wrong! server error: ${error.message}`
         })
@@ -60,4 +124,4 @@ const insertProductSchema = async(req, res)=>{
     }
 }
 
-module.exports = {insertProductSchema}
+module.exports = {insertProduct, getProductsStat}

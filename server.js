@@ -5,6 +5,7 @@ const {connectDatabase} = require('./database/db')
 const productRoutes = require('./routes/productsRoutes')
 connectDatabase()
 
+
 const PORT = process.env.PORT || 3000
 
 

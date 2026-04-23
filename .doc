@@ -1,0 +1,12 @@
+# MongoDB Operators Cheat Sheet
+
+## Comparison Operators
+
+| Operator | Meaning               |
+| -------- | --------------------- |
+| $gt      | greater than          |
+| $gte     | greater than or equal |
+| $lt      | less than             |
+| $lte     | less than or equal    |
+| $eq      | equal                 |
+| $ne      | not equal             |
