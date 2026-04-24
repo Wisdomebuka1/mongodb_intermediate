@@ -1,53 +1,118 @@
-const products = require('../models/products')
-const Products = require('../models/products')
+const Products = require("../models/Products");
 
+const getProductsStats = async (req, res) => {
+  try {
+    const data = await Products.aggregate([
+      {
+        //stage 1
 
-const getProductsStat = async(req, res)=>{
+        $match: {
+          inStock: true,
+          price: {
+            $gte: 100,
+          },
+        },
+      },
 
-  try{
-      const data =  await Products.aggregate([
-          {
-            $match:{
-              inStock: true,
-              price: {
-                  $gte: 100
-              }
+      {
+        //stage 2
 
-            },
+        $group: {
+          _id: "$category",
 
-            
+          count: {
+            $sum: 1,
+          },
+        },
+      },
+    ]);
+
+    if (data.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "no product match the price!",
+        product: [],
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "prodouct fetched successfully!",
+      product: data,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: `something went wrong! server error: ${error.message}`,
+    });
+  }
+};
+
+const getProductAnalysis = async (req, res) => {
+  try {
+    const analysisProducts = await Products.aggregate([
+      {
+        $match: {
+          category: "Electronics",
+        },
+      },
+
+      {
+        $group:{
+           _id: null,
+           totalRevenue:{$sum: '$price'},
+           averagePrice:{$avg: '$price'},
+           minProductsPrice:{$min: '$price'},
+           maxProductsPrice:{$max: '$price'}
+
+        }
+      },
+
+      {
+        $project:{
+          _id: 0,
+          totalRevenue: 1,
+          averagePrice: 1,
+          minProductsPrice: 1,
+          maxProductsPrice: 1,
+
+          priceRange:{
+             $subtract: ['$maxProductsPrice', '$minProductsPrice']
           }
-      ])
-      
-      
-      if(data.length === 0){
-          return res.status(404).json({
-             success: false,
-             message: 'no product match the price!',
-             product: []
-          })
+
+        }
       }
 
+    ]);
 
-      return res.status(200).json({
-          success: true,
-          message: 'prodouct fetched successfully!',
-          product: data
-      })
+    if (analysisProducts.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No electronics products found",
+        products: [],
+      });
+    }
 
-  }catch(error){
-    console.log(error)
-        res.status(500).json({
-            success: false,
-            message: `something went wrong! server error: ${error.message}`
-        })
+    return res.status(200).json({
+      success: true,
+      message: "Category products of electronics found!",
+      products: analysisProducts,
+    });
 
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: `something went wrong! server error: ${error.message}`,
+    });
   }
+};
 
-}
-
-const insertProduct = async(req, res)=>{
-    try{  const sampleProducts = [
+const insertProduct = async (req, res) => {
+  try {
+    const sampleProducts = [
       {
         name: "Laptop",
         category: "Electronics",
@@ -66,11 +131,10 @@ const insertProduct = async(req, res)=>{
       {
         name: "wrist watch",
         category: "Electronics",
-        price: 100,
-        inStock: true,
+        price: 20,
+        inStock: false,
         tags: ["mobile", "tech"],
       },
-
 
       {
         name: "Headphones",
@@ -95,33 +159,26 @@ const insertProduct = async(req, res)=>{
       },
     ];
 
-
-   
     if (!sampleProducts || sampleProducts.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "No products to insert"
+        message: "No products to insert",
       });
     }
 
-     const result = await Products.insertMany(sampleProducts)
-    
-      return res.status(201).json({
-            success: true,
-            message: `products has been inserted ${result.length}`
-        })
-    
+    const result = await Products.insertMany(sampleProducts);
 
-        
+    return res.status(201).json({
+      success: true,
+      message: `products has been inserted ${result.length}`,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: `something went wrong! server error: ${error.message}`,
+    });
+  }
+};
 
-    }catch(error){
-        console.log(error)
-        res.status(500).json({
-            success: false,
-            message: `something went wrong! server error: ${error.message}`
-        })
-
-    }
-}
-
-module.exports = {insertProduct, getProductsStat}
+module.exports = { insertProduct, getProductsStats, getProductAnalysis };

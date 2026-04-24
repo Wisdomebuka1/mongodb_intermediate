@@ -1,9 +1,11 @@
-const {insertProduct, getProductsStat} = require('../controllers/productsController')
+const {insertProduct, getProductsStats, getProductAnalysis} = require('../controllers/productsController')
 const express = require('express')
 const router = express.Router()
 
 router.post('/add', insertProduct)
-router.get('/stats', getProductsStat)
+router.get('/stats', getProductsStats)
+router.get('/analysis', getProductAnalysis)
+
 
 
 module.exports = router;

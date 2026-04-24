@@ -10,3 +10,102 @@
 | $lte     | less than or equal    |
 | $eq      | equal                 |
 | $ne      | not equal             |
+
+# MongoDB Aggregation Operators Cheat Sheet
+
+## 📌 Accumulator Operators (used in `$group`)
+
+These operators are used inside MongoDB aggregation pipelines to compute values from grouped documents.
+
+| Operator | Meaning         | Example Use                        |
+| -------- | --------------- | ---------------------------------- |
+| `$avg`   | average         | average product price per category |
+| `$sum`   | total sum       | total revenue or total quantity    |
+| `$min`   | smallest value  | cheapest product in a category     |
+| `$max`   | biggest value   | most expensive product             |
+| `$count` | number of items | count products in each group       |
+
+---
+
+## 🔥 Example Usage
+
+### 1. Average price per category
+
+```js
+{
+  $group: {
+    _id: "$category",
+    avgPrice: { $avg: "$price" }
+  }
+}
+```
+
+---
+
+### 2. Total price per category
+
+```js
+{
+  $group: {
+    _id: "$category",
+    totalPrice: { $sum: "$price" }
+  }
+}
+```
+
+---
+
+### 3. Minimum price per category
+
+```js
+{
+  $group: {
+    _id: "$category",
+    minPrice: { $min: "$price" }
+  }
+}
+```
+
+---
+
+### 4. Maximum price per category
+
+```js
+{
+  $group: {
+    _id: "$category",
+    maxPrice: { $max: "$price" }
+  }
+}
+```
+
+---
+
+### 5. Count products per category
+
+```js
+{
+  $group: {
+    _id: "$category",
+    count: { $sum: 1 }
+  }
+}
+```
+
+---
+
+## 🧠 Key Idea
+
+`$group` works like a pivot table:
+
+* Group data by a field (e.g. category)
+* Then calculate values inside each group
+
+---
+
+## 🚀 Use Cases
+
+* Ecommerce analytics 📊
+* Sales dashboards
+* Inventory reporting
+* Business insights
